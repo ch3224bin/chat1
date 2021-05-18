@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<body>
+<div>
+    <input id="message" type="text"><button onclick="sendMessage()">send</button>
+</div>
+<div id="events"></div>
+<script>
+    let clientWebSocket = new WebSocket("ws://localhost:8080/command");
+    clientWebSocket.onopen = function() {
+        console.log("clientWebSocket.onopen", clientWebSocket);
+        console.log("clientWebSocket.readyState", "websocketstatus");
+        clientWebSocket.send("event-me-from-browser");
+    }
+    clientWebSocket.onclose = function(ev) {
+        console.log("clientWebSocket.onclose", clientWebSocket, ev);
+        events("Closing connection");
+    }
+    clientWebSocket.onerror = function(error) {
+        console.log("clientWebSocket.onerror", clientWebSocket, error);
+        events("An error occured");
+    }
+    clientWebSocket.onmessage = function(ev) {
+        console.log("clientWebSocket.onmessage", clientWebSocket, ev);
+        events(ev.data);
+    }
+
+    function sendMessage() {
+        let input = document.querySelector("#message");
+        let message = input.value;
+        clientWebSocket.send(message);
+        input.value = "";
+    }
+    function events(responseEvent) {
+        let div = document.createElement("div");
+        div.innerHTML = responseEvent;
+        document.querySelector("#events").append(div);
+    }
+</script>
+</body>
+</html>
